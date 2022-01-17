@@ -93,6 +93,7 @@ export default class ActionHandler extends DefaultHandler {
 
     // Add the action id so we can deploy it later
     action.id = createdAction.id;
+    await sleep(3000);
     return createdAction;
   }
 
@@ -100,7 +101,9 @@ export default class ActionHandler extends DefaultHandler {
     if (!this.client.actions || typeof this.client.actions.delete !== 'function') {
       return [];
     }
-    return this.client.actions.delete({ id: action.id, force: true });
+    const res =  this.client.actions.delete({ id: action.id, force: true });
+    await sleep(3000);
+    return res;
   }
 
   objString(action) {
