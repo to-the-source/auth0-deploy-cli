@@ -9,11 +9,6 @@ export default async function deploy(assets, client, config) {
 
   const auth0 = new Auth0(client, assets, config);
 
-  console.log("ASSETS");
-  console.log("-----------------");
-  console.log(assets);
-  console.log("-----------------");
-
   // Validate Assets
   await auth0.validate();
 

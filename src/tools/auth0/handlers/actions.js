@@ -3,7 +3,7 @@ import DefaultHandler, { order } from './default';
 import log from '../../logger';
 import { areArraysEquals } from '../../utils';
 
-const MAX_ACTION_DEPLOY_RETRY = 60;
+const MAX_ACTION_DEPLOY_RETRY = 10;
 
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
@@ -126,6 +126,7 @@ export default class ActionHandler extends DefaultHandler {
 
   async deployAction(action) {
     try {
+      await sleep(3000);
       await this.client.actions.deploy({ id: action.id });
     } catch (err) {
       // Retry if pending build.
@@ -137,7 +138,7 @@ export default class ActionHandler extends DefaultHandler {
         if (action.retry_count > MAX_ACTION_DEPLOY_RETRY) {
           throw err;
         }
-        await sleep(1000);
+        await sleep(3000);
         action.retry_count += 1;
         await this.deployAction(action);
       }
