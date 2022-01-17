@@ -124,8 +124,7 @@ export default class ActionHandler extends DefaultHandler {
       .promise();
   }
 
-  async deployAction(action) {
-    let backoff = 1000;
+  async deployAction(action, backoff = 1000) {
     try {
       await sleep(backoff);
       await this.client.actions.deploy({ id: action.id });
@@ -145,7 +144,7 @@ export default class ActionHandler extends DefaultHandler {
         await sleep(backoff);
         action.retry_count += 1;
         log.info(`Deploying action: ${this.objString(action)}`);
-        await this.deployAction(action);
+        await this.deployAction(action, backoff);
       }
     }
   }
