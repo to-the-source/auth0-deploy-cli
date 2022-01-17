@@ -125,21 +125,26 @@ export default class ActionHandler extends DefaultHandler {
   }
 
   async deployAction(action) {
+    let backoff = 1000;
     try {
-      await sleep(3000);
+      await sleep(backoff);
       await this.client.actions.deploy({ id: action.id });
     } catch (err) {
       // Retry if pending build.
       if (err.message && err.message.includes('must be in the \'built\' state')) {
         if (!action.retry_count) {
           log.info(`[${this.type}]: Waiting for build to complete ${this.objString(action)}`);
-          action.retry_count = 1;
+          action.retry_count = 1;  
+        } else {
+          log.info(`[${this.type}]: Status is not built, retrying: ${this.objString(action)}`);
         }
         if (action.retry_count > MAX_ACTION_DEPLOY_RETRY) {
           throw err;
         }
-        await sleep(3000);
+        backoff *= 2;
+        await sleep(backoff);
         action.retry_count += 1;
+        log.info(`Deploying action: ${this.objString(action)}`);
         await this.deployAction(action);
       }
     }
