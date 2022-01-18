@@ -3,7 +3,7 @@ import DefaultHandler, { order } from './default';
 import log from '../../logger';
 import { areArraysEquals } from '../../utils';
 
-const MAX_ACTION_DEPLOY_RETRY = 10;
+const MAX_ACTION_DEPLOY_RETRY = 6;
 
 // With this schema, we can only validate property types but not valid properties on per type basis
 export const schema = {
@@ -140,10 +140,16 @@ export default class ActionHandler extends DefaultHandler {
         } else {
           log.info(`[${this.type}]: Status is not built, retrying: ${this.objString(action)}`);
         }
+        if (action.retry_count === 3) {
+          log.info("action deploy failed 3 times in a row. recreating action ...");
+          await sleep(2000);
+          await this.deleteAction(action);
+          await this.createAction(action);
+        }
         if (action.retry_count > MAX_ACTION_DEPLOY_RETRY) {
           throw err;
         }
-        backoff *= 2;
+        backoff *= 1.5;
         await sleep(backoff);
         action.retry_count += 1;
         log.info(`Deploying action: ${this.objString(action)}`);
