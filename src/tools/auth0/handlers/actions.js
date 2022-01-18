@@ -143,8 +143,11 @@ export default class ActionHandler extends DefaultHandler {
         if (action.retry_count === 3) {
           log.info("action deploy failed 3 times in a row. recreating action ...");
           await sleep(2000);
+          delete action.retry_count;
           await this.deleteAction(action);
+          delete action.id;
           await this.createAction(action);
+          action.retry_count = 3;
         }
         if (action.retry_count > MAX_ACTION_DEPLOY_RETRY) {
           throw err;
